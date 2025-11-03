@@ -6,22 +6,18 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var modelContext
+
     var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "bell")
-                .imageScale(.large)
-            Text("Remindly")
-                .font(.title)
-                .fontWeight(.semibold)
-            Text("Initial setup")
-                .foregroundColor(.secondary)
-        }
-        .padding()
+        NotesListView(modelContext: modelContext)
     }
 }
 
 #Preview {
+    let container = try! ModelContainer(for: Note.self)
     ContentView()
+        .modelContainer(container)
 }
