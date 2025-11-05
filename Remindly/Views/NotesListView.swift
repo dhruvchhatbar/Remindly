@@ -20,27 +20,21 @@ struct NotesListView: View {
                     if !viewModel.allTags.isEmpty {
                         TagChipsView(allTags: viewModel.allTags, selected: $viewModel.selectedTags)
                             .padding(.horizontal)
-                            .transition(.move(edge: .top).combined(with: .opacity))
                     }
                     List {
-                        ForEach(Array(viewModel.notes.enumerated()), id: \.element.id) { index, note in
-                            NoteRow(note: note, index: index, onDelete: { note in
-                                notePendingDelete = note
-                            })
+                        ForEach(viewModel.notes) { note in
+                            Button {
+                                path.append(note.id)
+                            } label: {
+                                NoteRow(note: note, onDelete: { note in
+                                    notePendingDelete = note
+                                })
+                            }
+                            .buttonStyle(.plain)
                             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                             .listRowBackground(Color.clear)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                    path.append(note.id)
-                                }
-                            }
                         }
-                        .onDelete(perform: { indexSet in
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                                viewModel.deleteNotes(at: indexSet)
-                            }
-                        })
+                        .onDelete(perform: viewModel.deleteNotes)
                     }
                     .scrollContentBackground(.hidden)
                     .listStyle(.plain)
@@ -52,28 +46,23 @@ struct NotesListView: View {
                     Button {
                         showingNew = true
                     } label: {
-                        ZStack(){
-                            Image(systemName: "plus.circle.fill")
-                                .font(.title2)
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [AppTheme.brand, AppTheme.brandSecondary],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .shadow(color: AppTheme.brand.opacity(0.4), radius: 6, x: 0, y: 3)
-                            
-                            Spacer()
-                            Image(systemName: "plus")
-                                .font(.title3.weight(.bold))
-                                .foregroundColor(.white)
-                                .shadow(color: .black.opacity(0.25), radius: 3, x: 0, y: 1)
-                                .padding(5.0)
-                            
-                        }
-                        .accessibilityLabel("Add note")
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .symbolRenderingMode(.palette)
+                            .overlay(content: {
+                                Image(systemName: "plus")
+                                    .foregroundColor(Color.white)
+                                    .padding()
+                            })
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [AppTheme.brand, AppTheme.brandSecondary],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                            )
+                            .shadow(color: AppTheme.brand.opacity(0.4), radius: 6, x: 0, y: 3)
+                            .accessibilityLabel("Add note")
                     }
                 }
             }
@@ -119,39 +108,30 @@ struct NotesListView: View {
 
 private struct NoteRow: View {
     let note: Note
-    let index: Int
     let onDelete: (Note) -> Void
-    @State private var isPressed = false
-    @State private var appear = false
-    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(note.title.isEmpty ? "Untitled" : note.title)
                     .font(.headline)
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color.primary, AppTheme.brand.opacity(0.8)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
+                    .foregroundStyle(.primary)
                 Spacer()
                 if note.reminderDate != nil {
                     Image(systemName: "bell.fill")
-                        .foregroundStyle(AppTheme.tagGradient)
-                        .font(.subheadline)
-                        .shadow(color: AppTheme.brand.opacity(0.4), radius: 4, x: 0, y: 2)
-                        .scaleEffect(isPressed ? 0.9 : 1.0)
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [AppTheme.brand, AppTheme.brandSecondary],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .shadow(color: AppTheme.brand.opacity(0.3), radius: 3, x: 0, y: 1)
                 }
                 Button {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                        onDelete(note)
-                    }
+                    onDelete(note)
                 } label: {
                     Image(systemName: "trash")
                         .foregroundStyle(.red)
-                        .font(.subheadline)
                 }
                 .buttonStyle(.plain)
             }
@@ -160,55 +140,37 @@ private struct NoteRow: View {
                     .lineLimit(2)
                     .foregroundStyle(.secondary)
                     .font(.subheadline)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
             if !note.tags.isEmpty {
                 HStack(spacing: 6) {
-                    ForEach(Array(note.tags.prefix(4).enumerated()), id: \.element) { index, tag in
+                    ForEach(note.tags.prefix(4), id: \.self) { tag in
                         Text(tag)
                             .font(.caption.bold())
                             .foregroundColor(.white)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 5)
-                            .background(AppTheme.tagGradient)
-                            .clipShape(Capsule())
-                            .shadow(color: AppTheme.brand.opacity(0.4), radius: 4, x: 0, y: 2)
-                            .scaleEffect(isPressed ? 0.95 : 1.0)
-                            .animation(
-                                .spring(response: 0.3, dampingFraction: 0.6)
-                                .delay(Double(index) * 0.05),
-                                value: isPressed
+                            .background(
+                                LinearGradient(
+                                    colors: [AppTheme.brand, AppTheme.brandSecondary],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
                             )
+                            .clipShape(Capsule())
+                            .shadow(color: AppTheme.brand.opacity(0.3), radius: 3, x: 0, y: 2)
                     }
                 }
             }
             HStack {
-                Label {
-                    Text(note.modifiedAt, style: .date)
-                        .font(.caption)
-                } icon: {
-                    Image(systemName: "clock.fill")
-                        .font(.caption2)
-                }
-                .foregroundStyle(.secondary)
+                Text(note.modifiedAt, style: .date)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 Spacer()
             }
         }
         .padding(16)
         .cardStyle()
-        .scaleEffect(isPressed ? 0.98 : appear ? 1.0 : 0.95)
-        .opacity(isPressed ? 0.9 : appear ? 1.0 : 0)
-        .offset(y: appear ? 0 : 20)
-        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isPressed)
         .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .onLongPressGesture(minimumDuration: 0, maximumDistance: .infinity, pressing: { pressing in
-            isPressed = pressing
-        }, perform: {})
-        .onAppear {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.8).delay(Double(index) * 0.05)) {
-                appear = true
-            }
-        }
     }
 }
 

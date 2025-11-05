@@ -68,7 +68,9 @@ final class NoteDetailViewModel: ObservableObject {
         note.reminderIdentifier = nil
         note.reminderDate = nil
         note.modifiedAt = Date()
-        do { try modelContext.save() } catch { }
+        do { try modelContext.save()
+            reminderEnabled.toggle()
+        } catch { }
     }
 
     static func parseTags(from text: String) -> [String] {

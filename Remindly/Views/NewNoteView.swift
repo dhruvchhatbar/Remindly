@@ -11,7 +11,6 @@ struct NewNoteView: View {
     @State private var markdownPreviewEnabled: Bool = false
     @State private var reminderEnabled: Bool = false
     @State private var reminderDate: Date = Date().addingTimeInterval(3600)
-    @State private var appear = false
 
     let onSaved: (Note) -> Void
 
@@ -26,7 +25,6 @@ struct NewNoteView: View {
                             Circle()
                                 .fill(AppTheme.tagGradient)
                                 .frame(width: 40, height: 40)
-                                .shadow(color: AppTheme.brand.opacity(0.3), radius: 8, x: 0, y: 4)
                             Image(systemName: "square.and.pencil")
                                 .font(.headline)
                                 .foregroundColor(.white)
@@ -34,13 +32,7 @@ struct NewNoteView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Create a new note")
                                 .font(.headline)
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [AppTheme.brand, AppTheme.brandSecondary],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
+                                .foregroundStyle(.primary)
                             Text("Title, content, tags and optional reminder")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
@@ -48,17 +40,8 @@ struct NewNoteView: View {
                         Spacer()
                     }
                     .padding(.vertical, 6)
-                    .opacity(appear ? 1 : 0)
-                    .offset(x: appear ? 0 : -20)
                 }
-                Section {
-                    TextField("Title", text: $title)
-                        .font(.title3)
-                        .foregroundStyle(.primary)
-                } header: {
-                    Text("Title")
-                        .foregroundStyle(AppTheme.brand.opacity(0.8))
-                }
+                    Section { TextField("Title", text: $title) .font(.title3) }
 
                 Section {
                     Picker("Mode", selection: $markdownPreviewEnabled) {
@@ -66,78 +49,30 @@ struct NewNoteView: View {
                         Text("Preview").tag(true)
                     }
                     .pickerStyle(.segmented)
-                    .tint(AppTheme.brand)
                     if markdownPreviewEnabled {
-                        ScrollView {
-                            Text(.init(content))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding()
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(AppTheme.cardGradient)
-                                )
-                        }
-                        .frame(minHeight: 220)
-                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
-                    } else {
-                        TextEditor(text: $content)
+                        ScrollView { Text(.init(content)).frame(maxWidth: .infinity, alignment: .leading) }
                             .frame(minHeight: 220)
-                            .font(.body)
-                            .scrollContentBackground(.hidden)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(AppTheme.cardGradient)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .strokeBorder(
-                                                AppTheme.brand.opacity(0.2),
-                                                lineWidth: 1
-                                            )
-                                    )
-                            )
-                            .padding(4)
-                            .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                    } else {
+                        TextEditor(text: $content).frame(minHeight: 220).font(.body)
                     }
-                } header: {
-                    Text("Content")
-                        .foregroundStyle(AppTheme.brand.opacity(0.8))
-                }
+                } header: { Text("Content").foregroundColor(.white) }
 
-                Section {
-                    TextField("Comma separated tags", text: $tagsText)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled(true)
-                        .padding(8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(AppTheme.cardGradient)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .strokeBorder(
-                                            AppTheme.brand.opacity(0.2),
-                                            lineWidth: 1
-                                        )
-                                )
-                        )
-                } header: {
-                    Text("Tags")
-                        .foregroundStyle(AppTheme.brand.opacity(0.8))
-                }
+                Section("Tags")
+                    { TextField("Comma separated tags", text: $tagsText).textInputAutocapitalization(.never).autocorrectionDisabled(true) }
+                        .foregroundColor(.white)
 
-                Section {
+                Section("Reminder"){
                     Toggle("Enable reminder", isOn: $reminderEnabled)
-                        .tint(AppTheme.brand)
+                        .foregroundColor(.black)
                     if reminderEnabled {
                         DatePicker("Remind at", selection: $reminderDate, displayedComponents: [.date, .hourAndMinute])
-                            .tint(AppTheme.brand)
-                            .transition(.opacity.combined(with: .move(edge: .top)))
+                            .foregroundColor(.black)
                     }
-                } header: {
-                    Text("Reminder")
-                        .foregroundStyle(AppTheme.brand.opacity(0.8))
                 }
+                .foregroundColor(.white)
                 }
                 .scrollContentBackground(.hidden)
+                .background(Color.gray.opacity(0.2))
             }
             .tint(AppTheme.brand)
             .navigationTitle("New Note")
@@ -157,11 +92,6 @@ struct NewNoteView: View {
                             )
                     }
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-            }
-            .onAppear {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                    appear = true
                 }
             }
         }

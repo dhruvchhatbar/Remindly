@@ -4,7 +4,7 @@ enum AppTheme {
     static let brand = Color("Brand")
     static let brandSecondary = Color("BrandSecondary")
     static let backgroundGradient = LinearGradient(
-        colors: [Color("BgTop"), Color("BgBottom")],
+        colors: [Color("Brand"), Color("BgBottom")],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
