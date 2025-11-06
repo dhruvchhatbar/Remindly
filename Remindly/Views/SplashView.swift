@@ -30,14 +30,15 @@ struct SplashView: View {
                         )
                         .shadow(color: Color.black.opacity(0.2), radius: 16, x: 0, y: 8)
                         .shadow(color: AppTheme.brand.opacity(0.35 * glow), radius: 24, x: 0, y: 0)
-                        .frame(width: 150, height: 100)
+                        .frame(width: 200, height: 150)
                         .overlay {
                             // Bell symbol inside
                             Image("launchIcon")
-                                .frame(width: 105, height: 75, alignment: .center)
+                                .frame(width: 205, height: 195, alignment: .center)
+                                .scaledToFill()
                                 .symbolRenderingMode(.palette)
                                 .scaleEffect(1.0 + glow * 0.05)
-                                .shadow(color: Color.white.opacity(0.6 * glow), radius: 10, x: 0, y: 0)
+                                .shadow(color: Color.white.opacity(0.9 * glow), radius: 10, x: 0, y: 0)
                         }
                         .mask {
                             // Soft shimmer mask
@@ -72,15 +73,15 @@ struct SplashView: View {
                             // Shimmer sweep
                             withAnimation(.easeInOut(duration: 1.6).repeatForever(autoreverses: false).delay(0.4)) { shimmerPhase = 1.0 }
                             // Sparkles
-                            withAnimation(.easeInOut(duration: 0.4).delay(0.4)) { showSparkles = true }
+                            withAnimation(.easeInOut(duration: 0.1).delay(0.1)) { showSparkles = true }
                         }
 
                     if showSparkles {
                         // Lightweight sparkle dots
                         ForEach(0..<10, id: \.self) { i in
                             Circle()
-                                .fill(Color.white.opacity(0.85))
-                                .frame(width: 3, height: 3)
+                                .fill(Color.white.opacity(0.9))
+                                .frame(width: 9, height: 9)
                                 .offset(randomOffset(index: i))
                                 .opacity(0.0)
                                 .onAppear {
@@ -92,10 +93,10 @@ struct SplashView: View {
                     }
                 }
 
-                Text("Remindly")
-                    .font(.largeTitle.bold())
-                    .foregroundStyle(.white.opacity(0.95))
-                    .opacity(opacity)
+//                Text("Remindly")
+//                    .font(.largeTitle.bold())
+//                    .foregroundStyle(.white.opacity(0.95))
+//                    .opacity(opacity)
             }
         }
         .task {
